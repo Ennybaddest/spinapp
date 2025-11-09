@@ -4,17 +4,36 @@ import { SpinWheel } from './components/SpinWheel';
 import { ResultModal } from './components/ResultModal';
 import { FormData } from './types';
 import { recordSpin } from './lib/supabase';
-import { hasSpunBefore, markAsSpun } from './utils/storage';
+import { hasSpunBefore, markAsSpun, getSavedSpinResult } from './utils/storage';
+
+const RESULT_DISPLAY_DURATION = 5000;
 
 function App() {
   const [formData, setFormData] = useState<FormData | null>(null);
   const [prize, setPrize] = useState<string | null>(null);
-  const [alreadySpun, setAlreadySpun] = useState(false);
+  const [savedResult, setSavedResult] = useState<string | null>(null);
   const [showWheel, setShowWheel] = useState(false);
+  const [showResultOnly, setShowResultOnly] = useState(false);
 
   useEffect(() => {
-    setAlreadySpun(hasSpunBefore());
+    const alreadySpun = hasSpunBefore();
+    if (alreadySpun) {
+      const saved = getSavedSpinResult();
+      if (saved) {
+        setSavedResult(saved);
+        setShowResultOnly(true);
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    if (showResultOnly && savedResult) {
+      const timer = setTimeout(() => {
+        window.location.href = '/';
+      }, RESULT_DISPLAY_DURATION);
+      return () => clearTimeout(timer);
+    }
+  }, [showResultOnly, savedResult]);
 
   const handleFormSubmit = (data: FormData) => {
     setFormData(data);
@@ -24,7 +43,6 @@ function App() {
   const handleSpinComplete = async (winningPrize: string) => {
     setPrize(winningPrize);
     markAsSpun();
-    setAlreadySpun(true);
 
     if (formData) {
       await recordSpin({
@@ -33,6 +51,10 @@ function App() {
         prize: winningPrize,
       });
     }
+
+    setTimeout(() => {
+      window.location.href = '/';
+    }, RESULT_DISPLAY_DURATION);
   };
 
   const handleCloseModal = () => {
@@ -50,32 +72,8 @@ function App() {
         </p>
       </div>
 
-      {alreadySpun && !showWheel ? (
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 max-w-md text-center">
-          <div className="text-6xl mb-4">😉</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-3">
-            You've already spun today!
-          </h2>
-          <p className="text-gray-600 mb-6">Come back next time for another chance to win amazing prizes!</p>
-          <div className="space-y-3">
-            <a
-              href="https://instagram.com/deliciosa"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
-            >
-              Follow @Deliciosa on Instagram
-            </a>
-            <a
-              href="https://wa.me/1234567890?text=Hi%20Deliciosa!%20I%20want%20to%20place%20an%20order"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
-            >
-              Order Now on WhatsApp
-            </a>
-          </div>
-        </div>
+      {showResultOnly && savedResult ? (
+        <ResultModal prize={savedResult} onClose={handleCloseModal} />
       ) : !showWheel ? (
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 max-w-md w-full">
           <div className="text-center mb-6">

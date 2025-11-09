@@ -6,6 +6,9 @@ interface SpinWheelProps {
   disabled: boolean;
 }
 
+const SPIN_RESULT_KEY = 'deliciosa_spin_result';
+const SPIN_ANIMATION_DURATION = 5000;
+
 export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -26,23 +29,27 @@ export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
     setTimeout(() => {
       setIsSpinning(false);
       const prizeText = `${prizes[randomIndex].emoji} ${prizes[randomIndex].text}`;
+
+      localStorage.setItem(SPIN_RESULT_KEY, prizeText);
+
       onSpinComplete(prizeText);
-    }, 5000);
+    }, SPIN_ANIMATION_DURATION);
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center">
-      <div className="relative w-80 h-80 md:w-96 md:h-96">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-20">
+    <div className="flex flex-col items-center justify-center w-full">
+      <div className="relative w-80 h-80 md:w-96 md:h-96 flex items-center justify-center mx-auto">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-3 z-20">
           <div className="w-0 h-0 border-l-[20px] border-r-[20px] border-t-[30px] border-l-transparent border-r-transparent border-t-pink-500 drop-shadow-lg"></div>
         </div>
 
         <div
           ref={wheelRef}
-          className="w-full h-full rounded-full shadow-2xl relative overflow-visible border-8 border-white"
+          className="w-full aspect-square rounded-full shadow-2xl relative overflow-visible border-8 border-white"
           style={{
             transform: `rotate(${rotation}deg)`,
             transition: isSpinning ? 'transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none',
+            transformOrigin: 'center',
           }}
         >
           {prizes.map((prize, index) => {
