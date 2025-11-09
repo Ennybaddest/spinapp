@@ -22,7 +22,7 @@ export function ResultModal({ prize, onClose }: ResultModalProps) {
   const isWinner = !prize.includes('Better Luck');
 
   const instagramUrl = 'https://instagram.com/deliciosa';
-  const whatsappUrl = 'https://wa.me/1234567890?text=Hi%20Deliciosa!%20I%20want%20to%20place%20an%20order';
+  const whatsappUrl = 'https://wa.me/2349020819224?text=Hi%20Deliciosa!%20I%20want%20to%20place%20an%20order';
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
