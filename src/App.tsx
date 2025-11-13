@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { SpinForm } from './components/SpinForm';
-import { SpinWheel } from './components/SpinWheel';
-import { ResultModal } from './components/ResultModal';
-import { FormData } from './types';
-import { recordSpin } from './lib/supabase';
-import { hasSpunBefore, markAsSpun, getSavedSpinResult } from './utils/storage';
+import { useState, useEffect } from "react";
+import { SpinForm } from "./components/SpinForm";
+import { SpinWheel } from "./components/SpinWheel";
+import { ResultModal } from "./components/ResultModal";
+import { FormData } from "./types";
+import { recordSpin } from "./lib/supabase";
+import { hasSpunBefore, markAsSpun, getSavedSpinResult } from "./utils/storage";
 
 const RESULT_DISPLAY_DURATION = 5000;
 
@@ -26,14 +26,14 @@ function App() {
     }
   }, []);
 
-  useEffect(() => {
-    if (showResultOnly && savedResult) {
-      const timer = setTimeout(() => {
-        window.location.href = '/';
-      }, RESULT_DISPLAY_DURATION);
-      return () => clearTimeout(timer);
-    }
-  }, [showResultOnly, savedResult]);
+  // useEffect(() => {
+  //   if (showResultOnly && savedResult) {
+  //     const timer = setTimeout(() => {
+  //       window.location.href = '/';
+  //     }, RESULT_DISPLAY_DURATION);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [showResultOnly, savedResult]);
 
   const handleFormSubmit = (data: FormData) => {
     setFormData(data);
@@ -53,7 +53,7 @@ function App() {
     }
 
     setTimeout(() => {
-      window.location.href = '/';
+      window.location.href = "/";
     }, RESULT_DISPLAY_DURATION);
   };
 
@@ -73,13 +73,23 @@ function App() {
       </div>
 
       {showResultOnly && savedResult ? (
-        <ResultModal prize={savedResult} onClose={handleCloseModal} />
+        <ResultModal
+          prize={savedResult}
+          onClose={() => {
+            setShowResultOnly(false);
+            setSavedResult(null);
+          }}
+        />
       ) : !showWheel ? (
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 max-w-md w-full">
           <div className="text-center mb-6">
             <div className="text-5xl mb-3">🍰✨</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Ready to Win?</h2>
-            <p className="text-gray-600">Enter your details to spin the wheel!</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Ready to Win?
+            </h2>
+            <p className="text-gray-600">
+              Enter your details to spin the wheel!
+            </p>
           </div>
           <SpinForm onSubmit={handleFormSubmit} />
         </div>
