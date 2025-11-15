@@ -8,14 +8,34 @@ interface SpinFormProps {
 export function SpinForm({ onSubmit }: SpinFormProps) {
   const [formData, setFormData] = useState<FormData>({ name: '', phone: '' });
   const [isLoading, setIsLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+
+  const validatePhone = (phone: string): boolean => {
+    const phoneRegex = /^0\d{10}$/;
+    return phoneRegex.test(phone);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name.trim() && formData.phone.trim()) {
-      setIsLoading(true);
-      await onSubmit(formData);
-      setIsLoading(false);
+    setPhoneError('');
+
+    if (!formData.name.trim()) {
+      return;
     }
+
+    if (!formData.phone.trim()) {
+      setPhoneError('Phone number is required');
+      return;
+    }
+
+    if (!validatePhone(formData.phone.trim())) {
+      setPhoneError('Phone number must be 11 digits and start with 0');
+      return;
+    }
+
+    setIsLoading(true);
+    await onSubmit(formData);
+    setIsLoading(false);
   };
 
   return (
@@ -37,9 +57,16 @@ export function SpinForm({ onSubmit }: SpinFormProps) {
             placeholder="Phone Number"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="w-full px-6 py-4 rounded-full border-2 border-pink-200 focus:border-pink-400 focus:outline-none text-lg bg-white/90 backdrop-blur-sm"
+            className={`w-full px-6 py-4 rounded-full border-2 focus:outline-none text-lg bg-white/90 backdrop-blur-sm transition ${
+              phoneError
+                ? 'border-red-400 focus:border-red-500'
+                : 'border-pink-200 focus:border-pink-400'
+            }`}
             required
           />
+          {phoneError && (
+            <p className="text-red-600 text-sm mt-2 font-semibold">{phoneError}</p>
+          )}
         </div>
         <button
           type="submit"

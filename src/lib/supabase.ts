@@ -11,19 +11,33 @@ export interface SpinRecord {
   prize: string;
 }
 
-export async function hasUserSpun(phone: string): Promise<boolean> {
+export interface UserSpinResult {
+  hasSpun: boolean;
+  prize?: string;
+  name?: string;
+}
+
+export async function getUserSpinStatus(phone: string): Promise<UserSpinResult> {
   const { data, error } = await supabase
     .from('user_spins')
-    .select('id')
+    .select('prize, name')
     .eq('phone', phone)
     .maybeSingle();
 
   if (error) {
     console.error('Error checking spin status:', error);
-    return false;
+    return { hasSpun: false };
   }
 
-  return data !== null;
+  if (data) {
+    return {
+      hasSpun: true,
+      prize: data.prize,
+      name: data.name,
+    };
+  }
+
+  return { hasSpun: false };
 }
 
 export async function recordSpin(data: SpinRecord) {

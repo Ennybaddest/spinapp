@@ -50,6 +50,8 @@ export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
           style={{
             width: "400px",
             height: "400px",
+            aspectRatio: "1 / 1",
+            overflow: "hidden",
             transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
             transition: isSpinning
               ? "transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99)"

@@ -3,7 +3,7 @@ import { SpinForm } from "./components/SpinForm";
 import { SpinWheel } from "./components/SpinWheel";
 import { ResultModal } from "./components/ResultModal";
 import { FormData } from "./types";
-import { recordSpin, hasUserSpun } from "./lib/supabase";
+import { recordSpin, getUserSpinStatus } from "./lib/supabase";
 import { hasSpunBefore, markAsSpun, getSavedSpinResult } from "./utils/storage";
 
 const RESULT_DISPLAY_DURATION = 5000;
@@ -14,7 +14,7 @@ function App() {
   const [savedResult, setSavedResult] = useState<string | null>(null);
   const [showWheel, setShowWheel] = useState(false);
   const [showResultOnly, setShowResultOnly] = useState(false);
-  const [hasAlreadySpun, setHasAlreadySpun] = useState(false);
+  const [previousPrize, setPreviousPrize] = useState<string | null>(null);
 
   useEffect(() => {
     const alreadySpun = hasSpunBefore();
@@ -37,9 +37,9 @@ function App() {
   // }, [showResultOnly, savedResult]);
 
   const handleFormSubmit = async (data: FormData) => {
-    const alreadySpun = await hasUserSpun(data.phone);
-    if (alreadySpun) {
-      setHasAlreadySpun(true);
+    const spinStatus = await getUserSpinStatus(data.phone);
+    if (spinStatus.hasSpun) {
+      setPreviousPrize(spinStatus.prize || null);
       return;
     }
     setFormData(data);
@@ -97,16 +97,23 @@ function App() {
               Enter your details to spin the wheel!
             </p>
           </div>
-          {hasAlreadySpun && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 rounded-lg">
-              <p className="text-red-800 font-semibold">
-                This phone number has already spun the wheel. You get one spin per visit!
+          {previousPrize && (
+            <div className="mb-4 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
+              <p className="text-yellow-800 font-semibold mb-2">
+                This phone number has already spun!
+              </p>
+              <div className="bg-white p-3 rounded mb-3 text-center">
+                <p className="text-sm text-gray-600 mb-1">Your previous prize:</p>
+                <p className="text-xl font-bold text-yellow-700">{previousPrize}</p>
+              </div>
+              <p className="text-yellow-700 text-sm mb-3">
+                Each phone number gets only one spin. Try with a different phone number.
               </p>
               <button
-                onClick={() => setHasAlreadySpun(false)}
-                className="mt-3 w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded font-semibold transition"
+                onClick={() => setPreviousPrize(null)}
+                className="w-full px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded font-semibold transition"
               >
-                Try Another Number
+                Use Different Number
               </button>
             </div>
           )}
