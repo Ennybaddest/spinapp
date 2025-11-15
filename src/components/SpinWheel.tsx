@@ -81,11 +81,10 @@ export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
           })}
 
           {prizes.map((prize, index) => {
-            const angle = (360 / prizes.length) * index;
             const segmentAngle = 360 / prizes.length;
-            const textAngle = angle + segmentAngle / 2;
+            const centerAngle = (segmentAngle * index) + (segmentAngle / 2);
             const radius = 130;
-            const radians = (textAngle * Math.PI) / 180;
+            const radians = (centerAngle * Math.PI) / 180;
             const x = Math.cos(radians) * radius;
             const y = Math.sin(radians) * radius;
 
@@ -96,9 +95,9 @@ export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
                 style={{
                   left: "50%",
                   top: "50%",
-                  transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) rotate(${textAngle}deg)`,
+                  transform: `translate(-50%, -50%) rotate(${centerAngle}deg) translateY(-${radius}px) rotate(-${centerAngle}deg)`,
                   width: "60px",
-                  transformOrigin: "0 0",
+                  whiteSpace: "nowrap",
                 }}
               >
                 <div className="text-2xl leading-none mb-1">{prize.emoji}</div>
