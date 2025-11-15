@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { prizes } from "../data/prizes";
 
 interface SpinWheelProps {
@@ -7,15 +7,22 @@ interface SpinWheelProps {
 }
 
 const SPIN_RESULT_KEY = "deliciosa_spin_result";
+const SPIN_ATTEMPTED_KEY = "deliciosa_spin_attempted";
 const SPIN_ANIMATION_DURATION = 5000;
 
 export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
+  const [hasSpun, setHasSpun] = useState(false);
   const wheelRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const hasAttempted = localStorage.getItem(SPIN_ATTEMPTED_KEY);
+    setHasSpun(!!hasAttempted);
+  }, []);
+
   const spinWheel = () => {
-    if (isSpinning || disabled) return;
+    if (isSpinning || disabled || hasSpun) return;
 
     setIsSpinning(true);
 
@@ -32,6 +39,8 @@ export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
       const prizeText = `${prizes[randomIndex].emoji} ${prizes[randomIndex].text}`;
 
       localStorage.setItem(SPIN_RESULT_KEY, prizeText);
+      localStorage.setItem(SPIN_ATTEMPTED_KEY, "true");
+      setHasSpun(true);
 
       onSpinComplete(prizeText);
     }, SPIN_ANIMATION_DURATION);
@@ -84,9 +93,6 @@ export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
             const segmentAngle = 360 / prizes.length;
             const centerAngle = (segmentAngle * index) + (segmentAngle / 2);
             const radius = 130;
-            const radians = (centerAngle * Math.PI) / 180;
-            const x = Math.cos(radians) * radius;
-            const y = Math.sin(radians) * radius;
 
             return (
               <div
@@ -114,10 +120,10 @@ export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
 
       <button
         onClick={spinWheel}
-        disabled={disabled || isSpinning}
+        disabled={disabled || isSpinning || hasSpun}
         className="px-12 py-4 mt-10 text-2xl font-bold text-white transition-all duration-200 transform rounded-full shadow-xl bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed hover:scale-110 disabled:scale-100"
       >
-        {isSpinning ? "SPINNING..." : "SPIN NOW!"}
+        {isSpinning ? "SPINNING..." : hasSpun ? "SPUN ALREADY" : "SPIN NOW!"}
       </button>
     </div>
   );
