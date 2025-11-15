@@ -3,7 +3,7 @@ import { SpinForm } from "./components/SpinForm";
 import { SpinWheel } from "./components/SpinWheel";
 import { ResultModal } from "./components/ResultModal";
 import { FormData } from "./types";
-import { recordSpin } from "./lib/supabase";
+import { recordSpin, hasUserSpun } from "./lib/supabase";
 import { hasSpunBefore, markAsSpun, getSavedSpinResult } from "./utils/storage";
 
 const RESULT_DISPLAY_DURATION = 5000;
@@ -14,6 +14,7 @@ function App() {
   const [savedResult, setSavedResult] = useState<string | null>(null);
   const [showWheel, setShowWheel] = useState(false);
   const [showResultOnly, setShowResultOnly] = useState(false);
+  const [hasAlreadySpun, setHasAlreadySpun] = useState(false);
 
   useEffect(() => {
     const alreadySpun = hasSpunBefore();
@@ -35,7 +36,12 @@ function App() {
   //   }
   // }, [showResultOnly, savedResult]);
 
-  const handleFormSubmit = (data: FormData) => {
+  const handleFormSubmit = async (data: FormData) => {
+    const alreadySpun = await hasUserSpun(data.phone);
+    if (alreadySpun) {
+      setHasAlreadySpun(true);
+      return;
+    }
     setFormData(data);
     setShowWheel(true);
   };
@@ -91,6 +97,19 @@ function App() {
               Enter your details to spin the wheel!
             </p>
           </div>
+          {hasAlreadySpun && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 rounded-lg">
+              <p className="text-red-800 font-semibold">
+                This phone number has already spun the wheel. You get one spin per visit!
+              </p>
+              <button
+                onClick={() => setHasAlreadySpun(false)}
+                className="mt-3 w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded font-semibold transition"
+              >
+                Try Another Number
+              </button>
+            </div>
+          )}
           <SpinForm onSubmit={handleFormSubmit} />
         </div>
       ) : (

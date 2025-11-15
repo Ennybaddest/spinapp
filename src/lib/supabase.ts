@@ -11,12 +11,35 @@ export interface SpinRecord {
   prize: string;
 }
 
-export async function recordSpin(data: SpinRecord) {
-  const { error } = await supabase
-    .from('spins')
-    .insert([data]);
+export async function hasUserSpun(phone: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('user_spins')
+    .select('id')
+    .eq('phone', phone)
+    .maybeSingle();
 
   if (error) {
-    console.error('Error recording spin:', error);
+    console.error('Error checking spin status:', error);
+    return false;
+  }
+
+  return data !== null;
+}
+
+export async function recordSpin(data: SpinRecord) {
+  try {
+    const { error } = await supabase
+      .from('user_spins')
+      .insert([{
+        phone: data.phone,
+        name: data.name,
+        prize: data.prize,
+      }]);
+
+    if (error) {
+      console.error('Error recording spin:', error);
+    }
+  } catch (err) {
+    console.error('Error recording spin:', err);
   }
 }

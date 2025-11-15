@@ -2,16 +2,19 @@ import { useState } from 'react';
 import { FormData } from '../types';
 
 interface SpinFormProps {
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: FormData) => Promise<void>;
 }
 
 export function SpinForm({ onSubmit }: SpinFormProps) {
   const [formData, setFormData] = useState<FormData>({ name: '', phone: '' });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.name.trim() && formData.phone.trim()) {
-      onSubmit(formData);
+      setIsLoading(true);
+      await onSubmit(formData);
+      setIsLoading(false);
     }
   };
 
@@ -40,9 +43,10 @@ export function SpinForm({ onSubmit }: SpinFormProps) {
         </div>
         <button
           type="submit"
-          className="w-full py-4 bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white font-bold text-xl rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
+          disabled={isLoading}
+          className="w-full py-4 bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-bold text-xl rounded-full shadow-lg transform hover:scale-105 disabled:scale-100 transition-all duration-200"
         >
-          Ready to Spin!
+          {isLoading ? 'Checking...' : 'Ready to Spin!'}
         </button>
       </form>
     </div>

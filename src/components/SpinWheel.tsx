@@ -39,16 +39,18 @@ export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
 
   return (
     <div className="flex flex-col items-center justify-center w-full mt-10">
-      <div className="relative flex items-center justify-center mx-auto w-80 h-80 md:w-96 md:h-96">
-        <div className="absolute top-0 z-20 -translate-x-1/2 -translate-y-3 left-1/2">
+      <div className="relative mx-auto" style={{ width: "400px", height: "400px" }}>
+        <div className="absolute top-1/2 left-1/2 z-20 -translate-x-1/2 -translate-y-full">
           <div className="w-0 h-0 border-l-[20px] border-r-[20px] border-t-[30px] border-l-transparent border-r-transparent border-t-pink-500 drop-shadow-lg"></div>
         </div>
 
         <div
           ref={wheelRef}
-          className="relative w-full overflow-visible border-8 border-white rounded-full shadow-2xl aspect-square"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-8 border-white rounded-full shadow-2xl"
           style={{
-            transform: `rotate(${rotation}deg)`,
+            width: "400px",
+            height: "400px",
+            transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
             transition: isSpinning
               ? "transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99)"
               : "none",
@@ -58,6 +60,7 @@ export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
           {prizes.map((prize, index) => {
             const angle = (360 / prizes.length) * index;
             const segmentAngle = 360 / prizes.length;
+            const textAngle = angle + segmentAngle / 2;
             return (
               <div
                 key={prize.id}
@@ -70,26 +73,35 @@ export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
                 <div
                   className="relative w-full h-full"
                   style={{ backgroundColor: prize.color }}
-                >
-                  <div
-                    className="absolute font-bold text-center"
-                    style={{
-                      top: "20px",
-                      left: "50%",
-                      transform: `translateX(-50%) rotate(${
-                        angle + segmentAngle / 2
-                      }deg)`,
-                      width: "70px",
-                      transformOrigin: "center",
-                    }}
-                  >
-                    <div className="mb-1 text-2xl leading-none">
-                      {prize.emoji}
-                    </div>
-                    <div className="text-xs leading-tight break-words text-amber-900">
-                      {prize.text}
-                    </div>
-                  </div>
+                />
+              </div>
+            );
+          })}
+
+          {prizes.map((prize, index) => {
+            const angle = (360 / prizes.length) * index;
+            const segmentAngle = 360 / prizes.length;
+            const textAngle = angle + segmentAngle / 2;
+            const radius = 130;
+            const radians = (textAngle * Math.PI) / 180;
+            const x = Math.cos(radians) * radius;
+            const y = Math.sin(radians) * radius;
+
+            return (
+              <div
+                key={`text-${prize.id}`}
+                className="absolute font-bold text-center"
+                style={{
+                  left: "50%",
+                  top: "50%",
+                  transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) rotate(${textAngle}deg)`,
+                  width: "60px",
+                  transformOrigin: "0 0",
+                }}
+              >
+                <div className="text-2xl leading-none mb-1">{prize.emoji}</div>
+                <div className="text-xs leading-tight break-words text-amber-900">
+                  {prize.text}
                 </div>
               </div>
             );
