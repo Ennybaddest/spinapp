@@ -97,13 +97,12 @@ export function SpinWheel({ onSpinComplete, disabled }: SpinWheelProps) {
             return (
               <div
                 key={`text-${prize.id}`}
-                className="absolute font-bold text-center"
+                className="absolute font-bold text-center w-14"
                 style={{
                   left: "50%",
                   top: "50%",
-                  transform: `translate(-50%, -50%) rotate(${centerAngle}deg) translateY(-${radius}px) rotate(-${centerAngle}deg)`,
-                  width: "60px",
-                  whiteSpace: "nowrap",
+                  transform: `rotate(${centerAngle}deg) translateY(-${radius}px) rotate(-${centerAngle}deg) translate(-50%, -50%)`,
+                  transformOrigin: "center",
                 }}
               >
                 <div className="text-2xl leading-none mb-1">{prize.emoji}</div>
