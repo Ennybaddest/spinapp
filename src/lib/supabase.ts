@@ -5,12 +5,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export interface SpinRecord {
-  name: string;
-  phone: string;
-  prize: string;
-}
-
 export interface UserSpinResult {
   hasSpun: boolean;
   prize?: string;
@@ -38,22 +32,4 @@ export async function getUserSpinStatus(phone: string): Promise<UserSpinResult> 
   }
 
   return { hasSpun: false };
-}
-
-export async function recordSpin(data: SpinRecord) {
-  try {
-    const { error } = await supabase
-      .from('user_spins')
-      .insert([{
-        phone: data.phone,
-        name: data.name,
-        prize: data.prize,
-      }]);
-
-    if (error) {
-      console.error('Error recording spin:', error);
-    }
-  } catch (err) {
-    console.error('Error recording spin:', err);
-  }
 }

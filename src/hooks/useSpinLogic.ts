@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { getUserSpinStatus, recordSpin } from '../lib/supabase';
+import { getUserSpinStatus } from '../lib/supabase';
+import { recordSpinViaAPI } from '../lib/api';
 
 export interface SpinLogicState {
   hasSpun: boolean;
@@ -51,7 +52,21 @@ export function useSpinLogic(phoneNumber: string | null) {
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
       try {
-        await recordSpin({ name, phone: phoneNumber, prize });
+        const response = await recordSpinViaAPI({
+          phoneNumber,
+          name,
+          prize,
+        });
+
+        if (response.statusCode !== 201) {
+          setState((prev) => ({
+            ...prev,
+            isLoading: false,
+            error: response.error || 'Failed to record spin',
+          }));
+          return;
+        }
+
         setState({
           hasSpun: true,
           lastPrize: prize,
