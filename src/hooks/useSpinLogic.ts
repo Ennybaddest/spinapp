@@ -1,8 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-// Assume these are updated to point to a secure API check endpoint
-// We'll call the history check function checkSpinHistoryAPI
-import { checkSpinHistoryAPI } from '../lib/api'; 
-import { recordSpinViaAPI } from '../lib/api';
+import { checkSpinHistoryAPI, recordSpinViaAPI } from '../lib/api';
 
 export interface SpinLogicState {
   hasSpun: boolean;
@@ -11,12 +8,11 @@ export interface SpinLogicState {
   error: string | null;
 }
 
-// Extend the response interface to handle the 409 conflict
 interface APIResponse {
   statusCode: number;
   error?: string;
-  existingPrize?: string; // Sent on 409
-  prize?: string; // Sent on 201 success
+  existingPrize?: string;
+  prize?: string;
 }
 
 
@@ -28,7 +24,6 @@ export function useSpinLogic(phoneNumber: string | null) {
     error: null,
   });
   
-  // Add useEffect to run the initial check when the component mounts and the phone number is provided
   useEffect(() => {
     if (phoneNumber) {
       checkSpinHistory();

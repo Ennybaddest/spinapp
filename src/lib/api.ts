@@ -13,6 +13,36 @@ export interface RecordSpinResponse {
   statusCode: number;
 }
 
+export interface CheckSpinHistoryResponse {
+  hasSpun: boolean;
+  prize?: string;
+  name?: string;
+}
+
+export async function checkSpinHistoryAPI(
+  phoneNumber: string
+): Promise<CheckSpinHistoryResponse> {
+  const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/checkSpin?phoneNumber=${encodeURIComponent(phoneNumber)}`;
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const responseData: CheckSpinHistoryResponse = await response.json();
+
+    return responseData;
+  } catch (error) {
+    console.error("Error calling checkSpin API:", error);
+    return {
+      hasSpun: false,
+    };
+  }
+}
+
 export async function recordSpinViaAPI(
   data: RecordSpinRequest
 ): Promise<RecordSpinResponse> {
@@ -23,7 +53,6 @@ export async function recordSpinViaAPI(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify(data),
     });
