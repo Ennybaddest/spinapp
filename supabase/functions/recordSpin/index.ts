@@ -68,6 +68,58 @@ async function recordSpin(req: Request): Promise<Response> {
       );
     }
 
+    const phoneNumber = body.phoneNumber.toString().trim();
+    const name = body.name.toString().trim();
+    const prize = body.prize.toString().trim();
+
+    if (!phoneNumber || !name || !prize) {
+      return new Response(
+        JSON.stringify({
+          error: "All fields must be non-empty strings",
+          statusCode: 400,
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    if (!/^0\d{10}$/.test(phoneNumber)) {
+      return new Response(
+        JSON.stringify({
+          error: "Invalid phone number format",
+          statusCode: 400,
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    if (name.length > 100) {
+      return new Response(
+        JSON.stringify({
+          error: "Name must not exceed 100 characters",
+          statusCode: 400,
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -93,7 +145,7 @@ async function recordSpin(req: Request): Promise<Response> {
     const { data: existingRecord, error: checkError } = await supabase
       .from("user_spins")
       .select("prize")
-      .eq("phone", body.phoneNumber)
+      .eq("phone", phoneNumber)
       .maybeSingle();
 
     if (checkError) {
@@ -130,15 +182,16 @@ async function recordSpin(req: Request): Promise<Response> {
       );
     }
 
-    const { error: insertError } = await supabase
+    const { error: insertError, data: insertData } = await supabase
       .from("user_spins")
       .insert([
         {
-          phone: body.phoneNumber,
-          name: body.name,
-          prize: body.prize,
+          phone: phoneNumber,
+          name: name,
+          prize: prize,
         },
-      ]);
+      ])
+      .select();
 
     if (insertError) {
       console.error("Database insert error:", insertError);
@@ -147,7 +200,7 @@ async function recordSpin(req: Request): Promise<Response> {
         const { data: conflictRecord } = await supabase
           .from("user_spins")
           .select("prize")
-          .eq("phone", body.phoneNumber)
+          .eq("phone", phoneNumber)
           .maybeSingle();
 
         return new Response(
@@ -169,6 +222,23 @@ async function recordSpin(req: Request): Promise<Response> {
       return new Response(
         JSON.stringify({
           error: "Failed to record spin",
+          statusCode: 500,
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    if (!insertData || insertData.length === 0) {
+      console.error("Insert succeeded but no data returned");
+      return new Response(
+        JSON.stringify({
+          error: "Failed to verify spin recording",
           statusCode: 500,
         }),
         {

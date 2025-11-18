@@ -9,33 +9,52 @@ export function SpinForm({ onSubmit }: SpinFormProps) {
   const [formData, setFormData] = useState<FormData>({ name: '', phone: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [phoneError, setPhoneError] = useState('');
+  const [nameError, setNameError] = useState('');
 
   const validatePhone = (phone: string): boolean => {
     const phoneRegex = /^0\d{10}$/;
     return phoneRegex.test(phone);
   };
 
+  const validateName = (name: string): boolean => {
+    const trimmed = name.trim();
+    return trimmed.length > 0 && trimmed.length <= 100;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPhoneError('');
+    setNameError('');
 
-    if (!formData.name.trim()) {
+    const trimmedName = formData.name.trim();
+    const trimmedPhone = formData.phone.trim();
+
+    if (!trimmedName) {
+      setNameError('Name is required');
       return;
     }
 
-    if (!formData.phone.trim()) {
+    if (!validateName(formData.name)) {
+      setNameError('Name must be between 1 and 100 characters');
+      return;
+    }
+
+    if (!trimmedPhone) {
       setPhoneError('Phone number is required');
       return;
     }
 
-    if (!validatePhone(formData.phone.trim())) {
+    if (!validatePhone(trimmedPhone)) {
       setPhoneError('Phone number must be 11 digits and start with 0');
       return;
     }
 
     setIsLoading(true);
-    await onSubmit(formData);
-    setIsLoading(false);
+    try {
+      await onSubmit({ name: trimmedName, phone: trimmedPhone });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -47,9 +66,17 @@ export function SpinForm({ onSubmit }: SpinFormProps) {
             placeholder="Your Name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-6 py-4 rounded-full border-2 border-pink-200 focus:border-pink-400 focus:outline-none text-lg bg-white/90 backdrop-blur-sm"
+            maxLength={100}
+            className={`w-full px-6 py-4 rounded-full border-2 focus:outline-none text-lg bg-white/90 backdrop-blur-sm transition ${
+              nameError
+                ? 'border-red-400 focus:border-red-500'
+                : 'border-pink-200 focus:border-pink-400'
+            }`}
             required
           />
+          {nameError && (
+            <p className="text-red-600 text-sm mt-2 font-semibold">{nameError}</p>
+          )}
         </div>
         <div>
           <input
