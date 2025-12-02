@@ -18,6 +18,8 @@ function App() {
 
   const handleFormSubmit = async (data: FormData) => {
     setFormError(null);
+    setShowWheel(false);
+    setResultPrize(null);
     setPhoneNumber(data.phone);
     setUserName(data.name);
   };
