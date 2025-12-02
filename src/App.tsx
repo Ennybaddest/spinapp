@@ -20,7 +20,6 @@ function App() {
     setFormError(null);
     setPhoneNumber(data.phone);
     setUserName(data.name);
-    await spinLogic.checkSpinHistory();
   };
 
   useEffect(() => {

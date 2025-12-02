@@ -168,7 +168,7 @@ async function recordSpin(req: Request): Promise<Response> {
     if (existingRecord) {
       return new Response(
         JSON.stringify({
-          error: "This phone number has already spun the wheel",
+          error: "Already spun",
           existingPrize: existingRecord.prize,
           statusCode: 409,
         }),
@@ -205,7 +205,7 @@ async function recordSpin(req: Request): Promise<Response> {
 
         return new Response(
           JSON.stringify({
-            error: "This phone number has already spun the wheel",
+            error: "Already spun",
             existingPrize: conflictRecord?.prize,
             statusCode: 409,
           }),
