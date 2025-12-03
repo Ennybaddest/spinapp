@@ -1,3 +1,5 @@
+import { getUserSpinStatus, recordUserSpin } from './supabase';
+
 export interface RecordSpinRequest {
   phoneNumber: string;
   name: string;
@@ -22,21 +24,15 @@ export interface CheckSpinHistoryResponse {
 export async function checkSpinHistoryAPI(
   phoneNumber: string
 ): Promise<CheckSpinHistoryResponse> {
-  const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/checkSpin?phoneNumber=${encodeURIComponent(phoneNumber)}`;
-
   try {
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const responseData: CheckSpinHistoryResponse = await response.json();
-
-    return responseData;
+    const result = await getUserSpinStatus(phoneNumber);
+    return {
+      hasSpun: result.hasSpun,
+      prize: result.prize,
+      name: result.name,
+    };
   } catch (error) {
-    console.error("Error calling checkSpin API:", error);
+    console.error("Error checking spin history:", error);
     return {
       hasSpun: false,
     };
@@ -46,27 +42,25 @@ export async function checkSpinHistoryAPI(
 export async function recordSpinViaAPI(
   data: RecordSpinRequest
 ): Promise<RecordSpinResponse> {
-  const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recordSpin`;
-
   try {
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+    const result = await recordUserSpin({
+      phoneNumber: data.phoneNumber,
+      name: data.name,
+      prize: data.prize,
     });
 
-    const responseData: RecordSpinResponse = await response.json();
-
     return {
-      ...responseData,
-      statusCode: response.status,
+      success: result.success,
+      message: result.success ? 'Spin recorded successfully' : result.error,
+      prize: result.prize,
+      error: result.error,
+      existingPrize: result.existingPrize,
+      statusCode: result.statusCode,
     };
   } catch (error) {
-    console.error("Error calling recordSpin API:", error);
+    console.error("Error recording spin:", error);
     return {
-      error: "Failed to connect to server",
+      error: "Failed to record spin",
       statusCode: 500,
     };
   }
