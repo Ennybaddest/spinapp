@@ -25,26 +25,36 @@ function App() {
   };
 
   useEffect(() => {
-    if (spinLogic.isLoading) return;
+    // Wait for loading to complete
+    if (spinLogic.isLoading) {
+      setShowWheel(false);
+      return;
+    }
 
+    // Handle errors
     if (spinLogic.error) {
       setFormError(spinLogic.error);
+      setShowWheel(false);
       return;
     }
 
+    // If user has already spun, don't show wheel
     if (spinLogic.hasSpun && spinLogic.lastPrize) {
-      setResultPrize(spinLogic.lastPrize);
+      setShowWheel(false);
       return;
     }
 
-    if (phoneNumber && !spinLogic.hasSpun) {
+    // Only show wheel if we have a phone number and user hasn't spun
+    if (phoneNumber && !spinLogic.hasSpun && !spinLogic.isLoading) {
       setShowWheel(true);
     }
   }, [spinLogic.hasSpun, spinLogic.isLoading, spinLogic.lastPrize, spinLogic.error, phoneNumber]);
 
   const handleSpinComplete = async (winningPrize: string) => {
     setResultPrize(winningPrize);
-    if (userName) {
+    setShowWheel(false);
+    
+    if (userName && phoneNumber) {
       await spinLogic.recordNewSpin(userName, winningPrize);
     }
 
@@ -66,6 +76,18 @@ function App() {
     setResultPrize(null);
     handleTryDifferentNumber();
   };
+
+  // Show loading state while checking
+  if (phoneNumber && spinLogic.isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cream-100 via-pink-50 to-yellow-50 flex flex-col items-center justify-center p-4">
+        <div className="text-center">
+          <div className="text-5xl mb-4 animate-pulse">🍰</div>
+          <p className="text-xl text-gray-700 font-medium">Checking your spin status...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cream-100 via-pink-50 to-yellow-50 flex flex-col items-center justify-center p-4">
