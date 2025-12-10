@@ -88,7 +88,11 @@ async function recordSpin(req: Request): Promise<Response> {
       );
     }
 
-    if (!/^(\+\d{1,3}[- ]?\d{1,14}|0\d{10})$/.test(phoneNumber)) {
+    const phoneRegex = /^(\+\d{1,3}[- ]?\d{1,12}|0\d{9,10})$/;
+    const digitsOnly = phoneNumber.replace(/[- ]/g, '');
+    const isValidLength = digitsOnly.length >= 10 && digitsOnly.length <= 15;
+
+    if (!phoneRegex.test(phoneNumber) || !isValidLength) {
       return new Response(
         JSON.stringify({
           error: "Invalid phone number format",

@@ -12,8 +12,10 @@ export function SpinForm({ onSubmit }: SpinFormProps) {
   const [nameError, setNameError] = useState('');
 
   const validatePhone = (phone: string): boolean => {
-    const phoneRegex = /^(\+\d{1,3}[- ]?\d{1,14}|0\d{10})$/;
-    return phoneRegex.test(phone);
+    const phoneRegex = /^(\+\d{1,3}[- ]?\d{1,12}|0\d{9,10})$/;
+    const digitsOnly = phone.replace(/[- ]/g, '');
+    const isValidLength = digitsOnly.length >= 10 && digitsOnly.length <= 15;
+    return phoneRegex.test(phone) && isValidLength;
   };
 
   const validateName = (name: string): boolean => {
