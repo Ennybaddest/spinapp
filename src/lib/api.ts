@@ -1,5 +1,19 @@
 import { getUserSpinStatus, recordUserSpin } from './supabase';
 
+export function normalizePhoneNumber(phone: string): string {
+  const cleaned = phone.replace(/[- ]/g, '');
+
+  if (cleaned.startsWith('+')) {
+    return cleaned;
+  }
+
+  if (cleaned.startsWith('0')) {
+    return '+234' + cleaned.slice(1);
+  }
+
+  return '+234' + cleaned;
+}
+
 export interface RecordSpinRequest {
   phoneNumber: string;
   name: string;
@@ -25,7 +39,8 @@ export async function checkSpinHistoryAPI(
   phoneNumber: string
 ): Promise<CheckSpinHistoryResponse> {
   try {
-    const result = await getUserSpinStatus(phoneNumber);
+    const normalizedPhone = normalizePhoneNumber(phoneNumber);
+    const result = await getUserSpinStatus(normalizedPhone);
     return {
       hasSpun: result.hasSpun,
       prize: result.prize,
@@ -43,8 +58,9 @@ export async function recordSpinViaAPI(
   data: RecordSpinRequest
 ): Promise<RecordSpinResponse> {
   try {
+    const normalizedPhone = normalizePhoneNumber(data.phoneNumber);
     const result = await recordUserSpin({
-      phoneNumber: data.phoneNumber,
+      phoneNumber: normalizedPhone,
       name: data.name,
       prize: data.prize,
     });
