@@ -12,7 +12,7 @@ export function SpinForm({ onSubmit }: SpinFormProps) {
   const [nameError, setNameError] = useState('');
 
   const validatePhone = (phone: string): boolean => {
-    const phoneRegex = /^0\d{10}$/;
+    const phoneRegex = /^(\+\d{1,3}[- ]?\d{1,14}|0\d{10})$/;
     return phoneRegex.test(phone);
   };
 
@@ -45,7 +45,7 @@ export function SpinForm({ onSubmit }: SpinFormProps) {
     }
 
     if (!validatePhone(trimmedPhone)) {
-      setPhoneError('Phone number must be 11 digits and start with 0');
+      setPhoneError('Enter a valid phone number (e.g., 05552459307 or +15552459307)');
       return;
     }
 

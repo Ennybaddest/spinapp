@@ -88,7 +88,7 @@ async function recordSpin(req: Request): Promise<Response> {
       );
     }
 
-    if (!/^0\d{10}$/.test(phoneNumber)) {
+    if (!/^(\+\d{1,3}[- ]?\d{1,14}|0\d{10})$/.test(phoneNumber)) {
       return new Response(
         JSON.stringify({
           error: "Invalid phone number format",

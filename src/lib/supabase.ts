@@ -52,6 +52,14 @@ export async function recordUserSpin(params: RecordSpinParams): Promise<RecordSp
   try {
     const { phoneNumber, name, prize } = params;
 
+    if (!/^(\+\d{1,3}[- ]?\d{1,14}|0\d{10})$/.test(phoneNumber)) {
+      return {
+        success: false,
+        statusCode: 400,
+        error: 'Invalid phone number format',
+      };
+    }
+
     const { data: existingRecord, error: checkError } = await supabase
       .from('user_spins')
       .select('prize')
